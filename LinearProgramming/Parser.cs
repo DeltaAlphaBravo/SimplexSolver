@@ -10,134 +10,89 @@ namespace LinearProgramming
         {
             aConstraint = aConstraint.Replace("\\s", ""); //clean the whitespace out.
 
-            List<ConstraintTerm> coeffList = new();
+            List<Term> coeffList = new();
 
             double rhs;
             int comparison = -1;
-            int comparisonType = 0;
+            Constraint.ComparisonType comparisonType = 0;
 
-            int left = 0;
-            int right = -1;
             if (aConstraint.IndexOf(">=") != -1)
             {
                 comparison = aConstraint.IndexOf(">=") - 1;
-                comparisonType = Constraint.GREATERTHAN;
+                comparisonType = Constraint.ComparisonType.GREATERTHAN;
             }
             else if (aConstraint.IndexOf("<=") != -1)
             {
                 comparison = aConstraint.IndexOf("<=") - 1;
-                comparisonType = Constraint.LESSTHAN;
+                comparisonType = Constraint.ComparisonType.LESSTHAN;
             }
             else if (aConstraint.IndexOf("=") != -1)
             {
                 comparison = aConstraint.IndexOf("=") - 1;
-                comparisonType = Constraint.EQUALTO;
+                comparisonType = Constraint.ComparisonType.EQUALTO;
             }
 
-            while (right < comparison)
+            var terms = aConstraint[..comparison].Split('+');
+
+            foreach(var term in terms)
             {
-                left = right + 1;
-                right = aConstraint.IndexOf('x', Math.Max(right, 0));
-                double coeff = Double.Parse(aConstraint.Substring(left, right));
-                left = right + 1; //skip over the x
-                right = aConstraint.IndexOf('+', right);
-                if (right == -1)
-                {
-                    right = comparison + 1;
-                }
-                int var = aTable.lookup(int.Parse(aConstraint.Substring(left, right)));
-
-                Console.WriteLine("Constraint: " + coeff + " " + var);
-
-                ConstraintTerm pair = new() { Coefficient = coeff, Variable = var };
-                coeffList.Add(pair);
+                coeffList.Add(ParseTerm(term));
             }
 
-            if (comparisonType == Constraint.EQUALTO)
+            if (comparisonType == Constraint.ComparisonType.EQUALTO)
             {
-                rhs = Double.Parse(aConstraint.Substring(comparison + 2,
-                                                            aConstraint.Length));
+                rhs = double.Parse(aConstraint.Substring(comparison + 2));
             }
             else
             {
-                rhs = Double.Parse(aConstraint.Substring(comparison + 3,
-                      aConstraint.Length));
+                rhs = double.Parse(aConstraint.Substring(comparison + 3));
             }
 
             //rhs must be positive
             if (rhs < 0)
             {
                 rhs *= -1;
-                comparisonType = Constraint.oppositeSign(comparisonType);
+                comparisonType = Constraint.OppositeSign(comparisonType);
                 for (int i = 0; i < coeffList.Count; i++)
                 {
-                    coeffList[i] = new() { Coefficient = coeffList[i].Coefficient * (-1), Variable = coeffList[i].Variable };
+                    coeffList[i] = new() { Coefficient = coeffList[i].Coefficient * (-1), VariableSubscript = coeffList[i].VariableSubscript };
                 }
             }
 
             return new Constraint(rhs, comparisonType, coeffList);
         }
 
-        public static double[,] parseObjective(String anObjective, LookupTable aTable)
+        private static Term ParseTerm(string term)
+        {
+            int xIndex = term.IndexOf('x');
+            return new Term
+            {
+                Coefficient = double.Parse(term[..xIndex]),
+                VariableSubscript = int.Parse(term[(xIndex + 1)..]) 
+            };
+        }
+
+        public static ObjectiveFunction parseObjective(String anObjective, LookupTable aTable)
         {
             anObjective = anObjective.Replace("\\s", ""); //clean the whitespace out.
+            List<Term> coeffList = new();
+            var terms = anObjective.Split('+');
 
-            List<double[]> coeffList = new List<double[]>();
-
-            int left = 0;
-            int right = -1;
-
-            while (right < anObjective.Length)
+            foreach (var term in terms)
             {
-                left = right + 1;
-                right = anObjective.IndexOf('x', right);
-                double coeff = Double.Parse(anObjective.Substring(left, right));
-                left = right + 1; //skip over the x
-                right = anObjective.IndexOf('+', right);
-                if (right == -1)
-                {
-                    right = anObjective.Length;
-                }
-                int var = aTable.lookup(int.Parse(anObjective.Substring(left, right)));
-                double[] pair = { coeff, var };
-
-                Console.WriteLine("Objective: " + coeff + " " + var);
-
-                coeffList.Add(pair);
+                coeffList.Add(ParseTerm(term));
             }
 
-            double[,] coeffs = new double[coeffList.Count, 2];
-            for (int x = 0; x < coeffList.Count; x++)
-            {
-                for (int y = 0; y < 2; y++)
-                {
-                    coeffs[x,y] = coeffList[x][y];
-                }
-            }
-
-            return coeffs;
+            return new ObjectiveFunction() { Terms = coeffList };
         }
 
         public static Constraint[] parseAllConstraints(String anLP, LookupTable aTable)
         {
             List<Constraint> result = new List<Constraint>();
 
-            int left = 0;
-            int right = 0;
-
-            while (left < anLP.Length)
+            foreach (var constraint in anLP.Split('\n'))
             {
-                right = anLP.IndexOf('\n', left);
-                if (right != -1)
-                {
-                    result.Add(parseConstraint(anLP.Substring(left, right), aTable));
-                    left = right + 1;
-                }
-                else
-                {
-                    result.Add(parseConstraint(anLP.Substring(left), aTable));
-                    left = anLP.Length;
-                }
+                result.Add(parseConstraint(constraint, aTable));
             }
             return result.ToArray();
         }

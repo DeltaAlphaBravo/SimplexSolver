@@ -12,16 +12,26 @@ namespace LinearProgramming.Tests
         public void TestMethod1()
         {
             var constraints = new Constraint[2];
-            constraints[0] = new Constraint(1, Constraint.LESSTHAN, new List<ConstraintTerm> { 
-                new ConstraintTerm { Coefficient = 1.0, Variable = 1 }, 
-                new ConstraintTerm { Coefficient = 1.0, Variable = 2 } 
+            constraints[0] = new Constraint(1, Constraint.ComparisonType.LESSTHAN, new List<Term> { 
+                new Term { Coefficient = 1.0, VariableSubscript = 1 }, 
+                new Term { Coefficient = 1.0, VariableSubscript = 2 } 
             });
-            constraints[1] = new Constraint(1, Constraint.LESSTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 1.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = -1.0, Variable = 2 }
+            constraints[1] = new Constraint(1, Constraint.ComparisonType.LESSTHAN, new List<Term> {
+                new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                new Term { Coefficient = -1.0, VariableSubscript = 2 }
             });
 
-            var target = Tableau.Create(constraints, new[,] { { 3.0, 1.0 }, { 1.0, 2.0 } }, 2);
+            var objective = new ObjectiveFunction()
+            {
+                Terms = new[] 
+                {
+                    new Term { Coefficient = 3.0, VariableSubscript = 1 },
+                    new Term { Coefficient = 1.0, VariableSubscript = 2 } 
+                },
+                Optimization = Optimization.Maximize
+            };
+
+            var target = Tableau.Create(constraints, objective, 2);
 
             target.Solve(Tableau.MAX).Should().BeTrue();
 
@@ -36,32 +46,50 @@ namespace LinearProgramming.Tests
         public void TestMethod2()
         {
             var constraints = new Constraint[2];
-            constraints[0] = new Constraint(1, Constraint.GREATERTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 1.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = 1.0, Variable = 2 }
+            constraints[0] = new Constraint(1, Constraint.ComparisonType.GREATERTHAN, new List<Term> {
+                new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                new Term { Coefficient = 1.0, VariableSubscript = 2 }
             });
-            constraints[1] = new Constraint(0, Constraint.LESSTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 1.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = 1.0, Variable = 2 }
+            constraints[1] = new Constraint(0, Constraint.ComparisonType.LESSTHAN, new List<Term> {
+                new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                new Term { Coefficient = 1.0, VariableSubscript = 2 }
             });
+            var objective = new ObjectiveFunction()
+            {
+                Terms = new[]
+    {
+                    new Term { Coefficient = 3.0, VariableSubscript = 1 },
+                    new Term { Coefficient = 1.0, VariableSubscript = 2 }
+                },
+                Optimization = Optimization.Maximize
+            };
 
-            ((Action)(() => Tableau.Create(constraints, new[,] { { 3.0, 1.0 }, { 1.0, 2.0 } }, 2))).Should().Throw<Exception>();
+            ((Action)(() => Tableau.Create(constraints, objective, 2))).Should().Throw<Exception>();
         }
 
         [TestMethod]
         public void TestMethod3()
         {
             var constraints = new Constraint[2];
-            constraints[0] = new Constraint(1, Constraint.LESSTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 1.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = 2.0, Variable = 2 }
+            constraints[0] = new Constraint(1, Constraint.ComparisonType.LESSTHAN, new List<Term> {
+                new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                new Term { Coefficient = 2.0, VariableSubscript = 2 }
             });
-            constraints[1] = new Constraint(0, Constraint.GREATERTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 0.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = 1.0, Variable = 2 }
+            constraints[1] = new Constraint(0, Constraint.ComparisonType.GREATERTHAN, new List<Term> {
+                new Term { Coefficient = 0.0, VariableSubscript = 1 },
+                new Term { Coefficient = 1.0, VariableSubscript = 2 }
             });
+            var objective = new ObjectiveFunction()
+            {
+                Terms = new[]
+    {
+                    new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                    new Term { Coefficient = 3.0, VariableSubscript = 2 }
+                },
+                Optimization = Optimization.Maximize
+            };
 
-            var target = Tableau.Create(constraints, new[,] { { 1.0, 1.0 }, { 3.0, 2.0 } }, 2);
+            var target = Tableau.Create(constraints, objective, 2);
 
             target.Solve(Tableau.MAX).Should().BeTrue();
 
@@ -74,16 +102,25 @@ namespace LinearProgramming.Tests
         public void TestMethod4()
         {
             var constraints = new Constraint[2];
-            constraints[0] = new Constraint(1, Constraint.GREATERTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 1.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = 1.0, Variable = 2 }
+            constraints[0] = new Constraint(1, Constraint.ComparisonType.GREATERTHAN, new List<Term> {
+                new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                new Term { Coefficient = 1.0, VariableSubscript = 2 }
             });
-            constraints[1] = new Constraint(0, Constraint.GREATERTHAN, new List<ConstraintTerm> {
-                new ConstraintTerm { Coefficient = 0.0, Variable = 1 },
-                new ConstraintTerm { Coefficient = 1.0, Variable = 2 }
+            constraints[1] = new Constraint(0, Constraint.ComparisonType.GREATERTHAN, new List<Term> {
+                new Term { Coefficient = 0.0, VariableSubscript = 1 },
+                new Term { Coefficient = 1.0, VariableSubscript = 2 }
             });
+            var objective = new ObjectiveFunction()
+            {
+                Terms = new[]
+    {
+                    new Term { Coefficient = 1.0, VariableSubscript = 1 },
+                    new Term { Coefficient = 3.0, VariableSubscript = 2 }
+                },
+                Optimization = Optimization.Maximize
+            };
 
-            var target = Tableau.Create(constraints, new[,] { { 1.0, 1.0 }, { 3.0, 2.0 } }, 2);
+            var target = Tableau.Create(constraints, objective, 2);
 
             target.Solve(Tableau.MAX).Should().BeFalse();
         }

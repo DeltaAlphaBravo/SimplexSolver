@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+using FluentAssertions;
 
 namespace LinearProgramming.Tests
 {
@@ -9,25 +9,33 @@ namespace LinearProgramming.Tests
         [TestMethod]
         public void TestMethod1()
         {
-            LookupTable table = new LookupTable();
-            Constraint[] dmitri = Parser.parseAllConstraints("1x1 + 1x2 + 1x3 = 60 \n 1x1 + 1x2 >= 45 \n 5x1 + -6x2 <=10 ", table);
-            //      Constraint[] dmitri = parseAllConstraints("1x1+3x2+2x3<=20\n1x1+1x2+1x3<=10", table);
-            String george = "3x1 + 2x2 + 4x3";
-            try
-            {
-                Tableau martha = Tableau.Create(dmitri, Parser.parseObjective(george, table), table.getSize());
+            LookupTable table = new();
+            Constraint[] actual = Parser.parseAllConstraints("1x1 + 1x2 + 1x3 = 60 \n 1x1 + 1x2 >= 45 \n 5x1 + -6x2 <=10 ", table);
 
-                martha.Solve(Tableau.MIN);
-                double[] bob = martha.GetSolutionValues();
-                for (int i = 0; i < bob.Length; i++)
-                {
-                    Console.WriteLine(table.reverseLookup(i) + " " + bob[i]);
-                }
-            }
-            catch (Exception e)
-            {
+            actual.Length.Should().Be(3);
 
-            }
+            actual[0].Terms[0].Coefficient.Should().Be(1);
+            actual[0].Terms[0].VariableSubscript.Should().Be(1);
+            actual[0].Terms[1].Coefficient.Should().Be(1);
+            actual[0].Terms[1].VariableSubscript.Should().Be(2);
+            actual[0].Terms[2].Coefficient.Should().Be(1);
+            actual[0].Terms[2].VariableSubscript.Should().Be(3);
+            actual[0].Sign.Should().Be(Constraint.ComparisonType.EQUALTO);
+            actual[0].RightHandSide.Should().Be(60);
+
+            actual[1].Terms[0].Coefficient.Should().Be(1);
+            actual[1].Terms[0].VariableSubscript.Should().Be(1);
+            actual[1].Terms[1].Coefficient.Should().Be(1);
+            actual[1].Terms[1].VariableSubscript.Should().Be(2);
+            actual[1].Sign.Should().Be(Constraint.ComparisonType.GREATERTHAN);
+            actual[1].RightHandSide.Should().Be(45);
+
+            actual[2].Terms[0].Coefficient.Should().Be(5);
+            actual[2].Terms[0].VariableSubscript.Should().Be(1);
+            actual[2].Terms[1].Coefficient.Should().Be(-6);
+            actual[2].Terms[1].VariableSubscript.Should().Be(2);
+            actual[2].Sign.Should().Be(Constraint.ComparisonType.LESSTHAN);
+            actual[2].RightHandSide.Should().Be(10);
         }
     }
 }

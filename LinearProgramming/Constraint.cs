@@ -1,51 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LinearProgramming
 {
     public class Constraint
     {
-        public const int GREATERTHAN = 1;
-        public const int LESSTHAN = -1;
-        public const int EQUALTO = 0;
+        public double RightHandSide { get; private set; }
 
-        private readonly double _rightHandSide;
-        private readonly int _sign;
-        private readonly double[,] _coefficients;
+        public ComparisonType Sign { get; private set; }
 
-        public Constraint(double aRHS, int aComparison, List<ConstraintTerm> aCoeffs)
+        public Term[] Terms { get; private set; }
+
+        public Constraint(double aRHS, ComparisonType aComparison, IEnumerable<Term> terms)
         {
-            _rightHandSide = aRHS;
-
-            _sign = aComparison;
-            _coefficients = new double[aCoeffs.Count, 2];
-            for (int x = 0; x < aCoeffs.Count; x++)
-            {
-
-                _coefficients[x, 0] = (aCoeffs[x]).Coefficient;
-                _coefficients[x, 1] = (aCoeffs[x]).Variable;
-            }
+            RightHandSide = aRHS;
+            Sign = aComparison;
+            Terms = terms.ToArray();
         }
 
-        public double GetTheRHS()
+        public static ComparisonType OppositeSign(ComparisonType aSign)
         {
-            return _rightHandSide;
+            return  (ComparisonType)((int)aSign * (-1));
         }
 
-        public int getTheSign()
+        public enum ComparisonType
         {
-            return _sign;
-        }
-
-        public double[,] getTheCoeffs()
-        {
-            return _coefficients;
-        }
-
-        public static int oppositeSign(int aSign)
-        {
-            return aSign * (-1);
+            GREATERTHAN = 1,
+            LESSTHAN = -1,
+            EQUALTO = 0
         }
     }
 }

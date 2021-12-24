@@ -31,32 +31,32 @@ namespace LinearProgramming
             _numUserVars = aNumUserVars;
         }
 
-        public static Tableau Create(Constraint[] aConstraints, double[,] anObj,
+        public static Tableau Create(Constraint[] constraints, ObjectiveFunction objective,
               int aNumUserVars)
         {
             int numVars = aNumUserVars;
             List<int[]> rowsWithArtVars = new List<int[]>();
 
-            int [] basis = new int[1 + aConstraints.Length];
+            int [] basis = new int[1 + constraints.Length];
             basis[0] = 0;
 
-            for (int x = 0; x < aConstraints.Length; x++)
+            for (int x = 0; x < constraints.Length; x++)
             {
-                if (aConstraints[x].getTheSign() == Constraint.LESSTHAN)
+                if (constraints[x].Sign == Constraint.ComparisonType.LESSTHAN)
                 {
                     numVars++;
                 }
-                if (aConstraints[x].getTheSign() == Constraint.GREATERTHAN)
+                if (constraints[x].Sign == Constraint.ComparisonType.GREATERTHAN)
                 {
                     numVars += 2;
                 }
-                if (aConstraints[x].getTheSign() == Constraint.EQUALTO)
+                if (constraints[x].Sign == Constraint.ComparisonType.EQUALTO)
                 {
                     numVars++;
                 }
             }
 
-            var numRows = aConstraints.Length + 1;
+            var numRows = constraints.Length + 1;
             var numCols = numVars + 2;
 
             var tableau = new double[numRows, numCols];
@@ -64,23 +64,24 @@ namespace LinearProgramming
             tableau[0, 0] = 1;
 
             int numSlackVars = 0;
-            for (int x = 0; x < aConstraints.Length; x++)
+            for (int x = 0; x < constraints.Length; x++)
             {
                 tableau[x + 1, 0] = 0;
-                for (int y = 0; y < aConstraints[x].getTheCoeffs().GetLength(0); y++)
+                for (int y = 0; y < constraints[x].Terms.Length; y++)
                 {
-                    tableau[x + 1, (int)aConstraints[x].getTheCoeffs()[y, 1]] = aConstraints[x].getTheCoeffs()[y, 0];
+                    int variableSubscript = constraints[x].Terms[y].VariableSubscript;
+                    tableau[x + 1, variableSubscript] = constraints[x].Terms[y].Coefficient;
                 }
 
-                tableau[x + 1, numCols - 1] = aConstraints[x].GetTheRHS();
+                tableau[x + 1, numCols - 1] = constraints[x].RightHandSide;
 
-                if (aConstraints[x].getTheSign() == Constraint.LESSTHAN)
+                if (constraints[x].Sign == Constraint.ComparisonType.LESSTHAN)
                 {
                     numSlackVars++;
                     tableau[x + 1, aNumUserVars + numSlackVars] = 1;
                     basis[x + 1] = aNumUserVars + numSlackVars;
                 }
-                if (aConstraints[x].getTheSign() == Constraint.GREATERTHAN)
+                if (constraints[x].Sign == Constraint.ComparisonType.GREATERTHAN)
                 {
                     numSlackVars++;
                     tableau[0, numCols - 2 - rowsWithArtVars.Count] = -1;
@@ -92,7 +93,7 @@ namespace LinearProgramming
                     pivotPoint[1] = numCols - 2 - rowsWithArtVars.Count;
                     rowsWithArtVars.Add(pivotPoint);
                 }
-                if (aConstraints[x].getTheSign() == Constraint.EQUALTO)
+                if (constraints[x].Sign == Constraint.ComparisonType.EQUALTO)
                 {
                     tableau[x + 1, numCols - 2 - rowsWithArtVars.Count] = 1;
                     tableau[0, numCols - 2 - rowsWithArtVars.Count] = -1;
@@ -140,9 +141,9 @@ namespace LinearProgramming
             }
 
             //add costs.
-            for (int x = 0; x < anObj.GetLength(0); x++)
+            for (int x = 0; x < objective.Terms.Count(); x++)
             {
-                tableau[0, (int)anObj[x, 1]] = (-1) * anObj[x, 0];
+                tableau[0, objective.Terms[x].VariableSubscript] = (-1) * objective.Terms[x].Coefficient;
             }
 
             Console.WriteLine("Before pivots\n" + result);

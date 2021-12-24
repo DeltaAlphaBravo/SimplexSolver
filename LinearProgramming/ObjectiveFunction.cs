@@ -4,7 +4,7 @@ namespace LinearProgramming
 {
     public class ObjectiveFunction
     {
-        public Optimization Optimization { get; }
-        public List<Term> Terms { get; set; } = new List<Term>();
+        public Optimization Optimization { get; init; }
+        public IList<Term> Terms { get; init; } = new List<Term>();
     }
 }
