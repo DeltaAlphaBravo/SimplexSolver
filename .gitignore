@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/LinearProgramming/bin/Debug/netcoreapp3.1
+/LinearProgramming/obj
+/LinearProgramming.Tests/bin/Debug/netcoreapp3.1
+/LinearProgramming.Tests/obj
+/SimplexMarket.Console/bin/Debug/netcoreapp3.1
+/SimplexMarket.Console/obj
