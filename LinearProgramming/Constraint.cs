@@ -14,22 +14,21 @@ namespace LinearProgramming
         private readonly int _sign;
         private readonly double[,] _coefficients;
 
-        public Constraint(double aRHS, int aComparison, List<double[]> aCoeffs)
+        public Constraint(double aRHS, int aComparison, List<ConstraintTerm> aCoeffs)
         {
             _rightHandSide = aRHS;
 
             _sign = aComparison;
-            _coefficients = new double[aCoeffs.Count,2];
+            _coefficients = new double[aCoeffs.Count, 2];
             for (int x = 0; x < aCoeffs.Count; x++)
             {
-                for (int y = 0; y < 2; y++)
-                {
-                    _coefficients[x,y] = (aCoeffs[x])[y];
-                }
+
+                _coefficients[x, 0] = (aCoeffs[x]).Coefficient;
+                _coefficients[x, 1] = (aCoeffs[x]).Variable;
             }
         }
 
-        public double getTheRHS()
+        public double GetTheRHS()
         {
             return _rightHandSide;
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LinearProgramming
 {
@@ -22,24 +21,24 @@ namespace LinearProgramming
         private readonly int _numCols;
         private readonly int _numUserVars;
 
-        public Tableau(double[,] aMatrix, int[] anInitialBasis)
+        public Tableau(double[,] aMatrix, int[] anInitialBasis, int aNumUserVars)
         {
             _tableau = aMatrix;
             _numRows = _tableau.GetLength(0);
             _numCols = _tableau.GetLength(1);
             CutUpTableau();
             _basis = anInitialBasis;
+            _numUserVars = aNumUserVars;
         }
 
-        public Tableau(Constraint[] aConstraints, double[,] anObj,
+        public static Tableau Create(Constraint[] aConstraints, double[,] anObj,
               int aNumUserVars)
         {
             int numVars = aNumUserVars;
-            _numUserVars = aNumUserVars;
             List<int[]> rowsWithArtVars = new List<int[]>();
 
-            _basis = new int[1 + aConstraints.Length];
-            _basis[0] = 0;
+            int [] basis = new int[1 + aConstraints.Length];
+            basis[0] = 0;
 
             for (int x = 0; x < aConstraints.Length; x++)
             {
@@ -57,69 +56,71 @@ namespace LinearProgramming
                 }
             }
 
-            _numRows = aConstraints.Length + 1;
-            _numCols = numVars + 2;
+            var numRows = aConstraints.Length + 1;
+            var numCols = numVars + 2;
 
-            _tableau = new double[_numRows, _numCols];
+            var tableau = new double[numRows, numCols];
 
-            _tableau[0, 0] = 1;
+            tableau[0, 0] = 1;
 
             int numSlackVars = 0;
             for (int x = 0; x < aConstraints.Length; x++)
             {
-                _tableau[x + 1, 0] = 0;
+                tableau[x + 1, 0] = 0;
                 for (int y = 0; y < aConstraints[x].getTheCoeffs().GetLength(0); y++)
                 {
-                    _tableau[x + 1, (int)aConstraints[x].getTheCoeffs()[y, 1]] = aConstraints[x].getTheCoeffs()[y, 0];
+                    tableau[x + 1, (int)aConstraints[x].getTheCoeffs()[y, 1]] = aConstraints[x].getTheCoeffs()[y, 0];
                 }
 
-                _tableau[x + 1, _numCols - 1] = aConstraints[x].getTheRHS();
+                tableau[x + 1, numCols - 1] = aConstraints[x].GetTheRHS();
 
                 if (aConstraints[x].getTheSign() == Constraint.LESSTHAN)
                 {
                     numSlackVars++;
-                    _tableau[x + 1, aNumUserVars + numSlackVars] = 1;
-                    _basis[x + 1] = aNumUserVars + numSlackVars;
+                    tableau[x + 1, aNumUserVars + numSlackVars] = 1;
+                    basis[x + 1] = aNumUserVars + numSlackVars;
                 }
                 if (aConstraints[x].getTheSign() == Constraint.GREATERTHAN)
                 {
                     numSlackVars++;
-                    _tableau[0, _numCols - 2 - rowsWithArtVars.Count] = -1;
-                    _tableau[x + 1, aNumUserVars + numSlackVars] = -1;
-                    _tableau[x + 1, _numCols - 2 - rowsWithArtVars.Count] = 1;
-                    _basis[x + 1] = _numCols - 2 - rowsWithArtVars.Count;
+                    tableau[0, numCols - 2 - rowsWithArtVars.Count] = -1;
+                    tableau[x + 1, aNumUserVars + numSlackVars] = -1;
+                    tableau[x + 1, numCols - 2 - rowsWithArtVars.Count] = 1;
+                    basis[x + 1] = numCols - 2 - rowsWithArtVars.Count;
                     int[] pivotPoint = new int[2];
                     pivotPoint[0] = x + 1;
-                    pivotPoint[1] = _numCols - 2 - rowsWithArtVars.Count;
+                    pivotPoint[1] = numCols - 2 - rowsWithArtVars.Count;
                     rowsWithArtVars.Add(pivotPoint);
                 }
                 if (aConstraints[x].getTheSign() == Constraint.EQUALTO)
                 {
-                    _tableau[x + 1, _numCols - 2 - rowsWithArtVars.Count] = 1;
-                    _tableau[0, _numCols - 2 - rowsWithArtVars.Count] = -1;
-                    _basis[x + 1] = _numCols - 2 - rowsWithArtVars.Count;
+                    tableau[x + 1, numCols - 2 - rowsWithArtVars.Count] = 1;
+                    tableau[0, numCols - 2 - rowsWithArtVars.Count] = -1;
+                    basis[x + 1] = numCols - 2 - rowsWithArtVars.Count;
                     int[] pivotPoint = new int[2];
                     pivotPoint[0] = x + 1;
-                    pivotPoint[1] = _numCols - 2 - rowsWithArtVars.Count;
+                    pivotPoint[1] = numCols - 2 - rowsWithArtVars.Count;
                     rowsWithArtVars.Add(pivotPoint);
                 }
             }
+
+            var result = new Tableau(tableau, basis, aNumUserVars);
 
             while (rowsWithArtVars.Any())
             {
                 int[] rowToAdd = rowsWithArtVars.First();
                 rowsWithArtVars.Remove(rowToAdd);
-                this.Pivot(rowToAdd[0], rowToAdd[1]);
+                result.Pivot(rowToAdd[0], rowToAdd[1]);
                 numVars--;
             }
-            Console.WriteLine("Initial Table: \n" + this + "\n");
+            Console.WriteLine("Initial Table: \n" + result + "\n");
 
-            this.Solve(Tableau.MIN); //End Phase 1. Begin Phase 2.
+            result.Solve(Tableau.MIN); //End Phase 1. Begin Phase 2.
 
-            if (_tableau[0, _numCols - 1] != 0)
+            if (tableau[0, numCols - 1] != 0)
             {
                 String error = "Infeasible based on the min of art vars not being 0" +
-                               "Col: " + _numCols + " " + _tableau[0, _numCols - 1];
+                               "Col: " + numCols + " " + tableau[0, numCols - 1];
                 Exception e = new Exception(error);
                 throw (e);
             }
@@ -130,27 +131,27 @@ namespace LinearProgramming
              * They don't really add much computation so I'll just leave them zeroed out.
              */
 
-            for (int x = numVars + 1; x < _numCols - 1; x++)
+            for (int x = numVars + 1; x < numCols - 1; x++)
             {
-                for (int y = 0; y < _numRows; y++)
+                for (int y = 0; y < numRows; y++)
                 {
-                    _tableau[y, x] = 0;
+                    tableau[y, x] = 0;
                 }
             }
 
             //add costs.
             for (int x = 0; x < anObj.GetLength(0); x++)
             {
-                _tableau[0, (int)anObj[x, 1]] = (-1) * anObj[x, 0];
+                tableau[0, (int)anObj[x, 1]] = (-1) * anObj[x, 0];
             }
 
-            Console.WriteLine("Before pivots\n" + this);
+            Console.WriteLine("Before pivots\n" + result);
             //the z-row didn't necessarily respect the basis variables. Pivot to sort things out.
-            for (int j = 1; j < _basis.Length; j++)
+            for (int j = 1; j < basis.Length; j++)
             {
                 try
                 {
-                    Pivot(j, _basis[j]);
+                    result.Pivot(j, basis[j]);
                 }
                 catch (Exception e)
                 {
@@ -158,7 +159,9 @@ namespace LinearProgramming
                 }
             }
 
-            Console.WriteLine("PHASE 1 TABLE: \n" + this + "\n");
+            Console.WriteLine("PHASE 1 TABLE: \n" + result + "\n");
+
+            return result;
         }
 
         /**

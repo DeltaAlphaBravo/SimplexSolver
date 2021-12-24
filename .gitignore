@@ -9,3 +9,5 @@
 /LinearProgramming.Tests/obj
 /SimplexMarket.Console/bin/Debug/netcoreapp3.1
 /SimplexMarket.Console/obj
+/LinearProgramming/bin/Debug/net5.0
+/LinearProgramming.Tests/bin/Debug/net5.0

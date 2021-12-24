@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LinearProgramming.Tests
 {
     [TestClass]
-    class ParserTests
+    public class ParserTests
     {
         [TestMethod]
         public void TestMethod1()
@@ -17,7 +15,7 @@ namespace LinearProgramming.Tests
             String george = "3x1 + 2x2 + 4x3";
             try
             {
-                Tableau martha = new Tableau(dmitri, Parser.parseObjective(george, table), table.getSize());
+                Tableau martha = Tableau.Create(dmitri, Parser.parseObjective(george, table), table.getSize());
 
                 martha.Solve(Tableau.MIN);
                 double[] bob = martha.GetSolutionValues();

@@ -10,7 +10,7 @@ namespace LinearProgramming
         {
             aConstraint = aConstraint.Replace("\\s", ""); //clean the whitespace out.
 
-            List<double[]> coeffList = new List<double[]>();
+            List<ConstraintTerm> coeffList = new();
 
             double rhs;
             int comparison = -1;
@@ -37,7 +37,7 @@ namespace LinearProgramming
             while (right < comparison)
             {
                 left = right + 1;
-                right = aConstraint.IndexOf('x', right);
+                right = aConstraint.IndexOf('x', Math.Max(right, 0));
                 double coeff = Double.Parse(aConstraint.Substring(left, right));
                 left = right + 1; //skip over the x
                 right = aConstraint.IndexOf('+', right);
@@ -49,7 +49,7 @@ namespace LinearProgramming
 
                 Console.WriteLine("Constraint: " + coeff + " " + var);
 
-                double[] pair = { coeff, var };
+                ConstraintTerm pair = new() { Coefficient = coeff, Variable = var };
                 coeffList.Add(pair);
             }
 
@@ -67,11 +67,11 @@ namespace LinearProgramming
             //rhs must be positive
             if (rhs < 0)
             {
-                rhs = rhs * -1;
+                rhs *= -1;
                 comparisonType = Constraint.oppositeSign(comparisonType);
                 for (int i = 0; i < coeffList.Count; i++)
                 {
-                    coeffList[i][0] = coeffList[i][0] * (-1);
+                    coeffList[i] = new() { Coefficient = coeffList[i].Coefficient * (-1), Variable = coeffList[i].Variable };
                 }
             }
 
@@ -150,7 +150,7 @@ namespace LinearProgramming
             String george = "3x1 + 2x2 + 4x3";
             try
             {
-                Tableau martha = new Tableau(dmitri, parseObjective(george, table), table.getSize());
+                Tableau martha = Tableau.Create(dmitri, parseObjective(george, table), table.getSize());
 
                 martha.Solve(Tableau.MIN);
                 double[] bob = martha.GetSolutionValues();
