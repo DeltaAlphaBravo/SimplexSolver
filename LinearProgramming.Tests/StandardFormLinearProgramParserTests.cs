@@ -5,7 +5,7 @@ using LinearProgramming.Parsing;
 namespace LinearProgramming.Tests
 {
     [TestClass]
-    public class ParserTests
+    public class StandardFormLinearProgramParserTests
     {
         [TestMethod]
         public void TestMaximization()
