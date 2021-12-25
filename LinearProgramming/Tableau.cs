@@ -293,11 +293,6 @@ namespace LinearProgramming
             return solutions;
         }
 
-        public double[,] GetTableau()
-        {
-            return _tableau;
-        }
-
         public override string ToString()
         {
             String result = new String("");

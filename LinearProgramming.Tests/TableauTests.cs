@@ -31,15 +31,14 @@ namespace LinearProgramming.Tests
                 Optimization = Optimization.Maximize
             };
 
-            var target = Tableau.Create(constraints, objective, 2);
+            var solution = new SimplexSolver().GetSolution(new LinearProgram(objective, constraints));
 
-            target.Solve(Tableau.MAX).Should().BeTrue();
+            solution.SolutionValues.Should().HaveCount(2);
 
-            target.GetSolution().Should().Be(3);
+            solution.SolutionValues.Should().OnlyContain(t => t.VariableSubscript == 1 && t.Coefficient == 1.0
+                                                           || t.VariableSubscript == 2 && t.Coefficient == 0.0);
 
-            target.GetSolutionValues().Should().HaveCount(3);
-
-            target.GetSolutionValues().Should().ContainInOrder(1.0, 0.0);
+            solution.OptimalValue.Should().Be(3);
         }
 
         [TestMethod]
@@ -64,7 +63,7 @@ namespace LinearProgramming.Tests
                 Optimization = Optimization.Maximize
             };
 
-            ((Action)(() => Tableau.Create(constraints, objective, 2))).Should().Throw<Exception>();
+            ((Action)(() => new SimplexSolver().GetSolution(new LinearProgram(objective, constraints)))).Should().Throw<Exception>();
         }
 
         [TestMethod]
@@ -89,13 +88,11 @@ namespace LinearProgramming.Tests
                 Optimization = Optimization.Maximize
             };
 
-            var target = Tableau.Create(constraints, objective, 2);
+            var solution = new SimplexSolver().GetSolution(new LinearProgram(objective, constraints));
 
-            target.Solve(Tableau.MAX).Should().BeTrue();
-
-            target.GetSolution().Should().Be(1.5);
-
-            target.GetSolutionValues().Should().ContainInOrder(0.0, 0.5);
+            solution.SolutionValues.Should().OnlyContain(t => t.VariableSubscript == 1 && t.Coefficient == 0.0
+                                                           || t.VariableSubscript == 2 && t.Coefficient == 0.5);
+            solution.OptimalValue.Should().Be(1.5);
         }
 
         [TestMethod]
@@ -120,9 +117,12 @@ namespace LinearProgramming.Tests
                 Optimization = Optimization.Maximize
             };
 
-            var target = Tableau.Create(constraints, objective, 2);
+            var solution = new SimplexSolver().GetSolution(new LinearProgram(objective, constraints));
 
-            target.Solve(Tableau.MAX).Should().BeFalse();
+            //target.Solve(Tableau.MAX).Should().BeFalse();
+
+            solution.SolutionValues.Should().BeNull();
+            solution.OptimalValue.Should().BeNull();
         }
     }
 }
