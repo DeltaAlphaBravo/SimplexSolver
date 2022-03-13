@@ -158,6 +158,16 @@ namespace LinearProgramming.Tests
                                1x2 >= 0",
             39.444,
             5.222, 2.222)]
+        [DataRow(@"Maximize: 1x3+1x4
+                   Subject to: 1x1+-1x3 = 1
+                               3x2+-1x4 = 1
+                               1x1+1x2 <= 3
+                               1x1 <= 3
+                               1x2 <= 2
+                               1x1 >= 0
+                               1x2 >= 0",
+            5,
+            1, 2, 0, 5)]
         public void TestMethod6(string programString, double optimalValue, params double[] coefficients)
         {
             var parser = StandardFormLinearProgramParser.CreateDefault();

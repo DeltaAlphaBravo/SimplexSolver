@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LinearProgramming\LinearProgramming.csproj" />
+    <ProjectReference Include="..\StandardFormLinearProgramParsing\StandardFormLinearProgramParsing.csproj" />
   </ItemGroup>
 
 </Project>

@@ -35,9 +35,9 @@ namespace LinearProgramming
               int aNumUserVars)
         {
             int numVars = aNumUserVars;
-            List<int[]> rowsWithArtVars = new List<int[]>();
+            List<int[]> rowsWithArtVars = new();
 
-            int [] basis = new int[1 + constraints.Length];
+            int[] basis = new int[1 + constraints.Length];
             basis[0] = 0;
 
             for (int x = 0; x < constraints.Length; x++)
@@ -114,15 +114,14 @@ namespace LinearProgramming
                 result.Pivot(rowToAdd[0], rowToAdd[1]);
                 numVars--;
             }
-            Console.WriteLine("Initial Table: \n" + result + "\n");
 
             result.Solve(Tableau.MIN); //End Phase 1. Begin Phase 2.
 
             if (tableau[0, numCols - 1] != 0)
             {
-                String error = "Infeasible based on the min of art vars not being 0" +
+                string error = "Infeasible based on the min of art vars not being 0" +
                                "Col: " + numCols + " " + tableau[0, numCols - 1];
-                Exception e = new Exception(error);
+                Exception e = new(error);
                 throw (e);
             }
 
@@ -141,7 +140,7 @@ namespace LinearProgramming
             }
 
             //add costs.
-            for (int x = 0; x < objective.Terms.Count(); x++)
+            for (int x = 0; x < objective.Terms.Count; x++)
             {
                 tableau[0, objective.Terms[x].VariableSubscript] = (-1) * objective.Terms[x].Coefficient;
             }
@@ -159,8 +158,6 @@ namespace LinearProgramming
                     Console.WriteLine(e);
                 }
             }
-
-            Console.WriteLine("PHASE 1 TABLE: \n" + result + "\n");
 
             return result;
         }
@@ -193,14 +190,7 @@ namespace LinearProgramming
         private void Pivot(int row, int var)
         {
             //TODO: Check for division by zero and that row > 0
-            try
-            {
-                ReduceRow(row, var);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            ReduceRow(row, var);
             for (int y = 0; y < _numRows; y++)
             {
                 if (y != row)
@@ -295,7 +285,7 @@ namespace LinearProgramming
 
         public override string ToString()
         {
-            String result = new String("");
+            string result = string.Empty;
             for (int column = 0; column < _numCols; column++)
             {
                 result = result + "x" + column + "  ";
@@ -378,29 +368,21 @@ namespace LinearProgramming
         public bool Solve(bool isMaximizing)
         {
             bool bounded = true;
-            int entering = this.ChooseEntering(isMaximizing);
+            int entering = ChooseEntering(isMaximizing);
             while (entering != 0)
             {
-                int exiting = this.ChooseExiting(entering);
+                int exiting = ChooseExiting(entering);
                 if (exiting > 0)
                 {
-                    int row = this.ReplaceVarInBasis(entering, exiting);
-                    try
-                    {
-                        this.Pivot(row, entering);
-                    }
-                    catch (Exception e)
-                    {
-                        throw e;
-                    }
-                    entering = this.ChooseEntering(isMaximizing);
+                    int row = ReplaceVarInBasis(entering, exiting);
+                    Pivot(row, entering);
+                    entering = ChooseEntering(isMaximizing);
                 }
                 else
                 {
                     bounded = false;
                     entering = 0;
                 }
-                Console.WriteLine(this + "\n");
             }
             CutUpTableau();
             return bounded;
