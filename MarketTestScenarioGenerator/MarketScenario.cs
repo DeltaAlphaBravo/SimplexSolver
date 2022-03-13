@@ -12,21 +12,15 @@ namespace MarketTestScenarioGenerator
             var potentialTransactions = new List<PotentialTransaction>();
             var variableIndex = 0;
             foreach (var buyer in buyers)
-            {
                 foreach (var seller in sellers)
                 {
-                    var potentialTransaction = new PotentialTransaction
-                    {
-                        Buyer = buyer,
-                        Seller = seller,
-                    };
+                    var potentialTransaction = new PotentialTransaction { Buyer = buyer, Seller = seller, };
                     if (potentialTransaction.PriceDifference > 0)
                     {
                         potentialTransaction.SaleVariableIndex = ++variableIndex;
                         potentialTransactions.Add(potentialTransaction);
                     }
                 }
-            }
             foreach (var potentialTransaction in potentialTransactions)
                 potentialTransaction.SlackVariableIndex = ++variableIndex;
             _potentialTransactions = potentialTransactions;
@@ -43,7 +37,7 @@ namespace MarketTestScenarioGenerator
             var constraints = CreatePriceConstraints()
                               .Concat(CreateProductionConstraints())
                               .Concat(CreateDemandConstraints())
-                              .Concat(CreatePositiveQuantityConstraints());
+                             ;// .Concat(CreatePositiveQuantityConstraints());
             var objective = new ObjectiveFunction
             {
                 Optimization = Optimization.Maximize,

@@ -288,14 +288,14 @@ namespace LinearProgramming
             string result = string.Empty;
             for (int column = 0; column < _numCols; column++)
             {
-                result = result + "x" + column + "  ";
+                result = result + "x" + column + " \t";
             }
             result += "\n";
             for (int row = 0; row < _numRows; row++)
             {
                 for (int column = 0; column < _numCols; column++)
                 {
-                    result = result += _tableau[row, column] + " ";
+                    result = result += _tableau[row, column].ToString("F") + "\t";
                 }
                 result += "\n";
             }

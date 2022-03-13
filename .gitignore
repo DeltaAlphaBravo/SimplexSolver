@@ -11,3 +11,11 @@
 /SimplexMarket.Console/obj
 /LinearProgramming/bin/Debug/net5.0
 /LinearProgramming.Tests/bin/Debug/net5.0
+/MarketTestScenarioGenerator/bin/Debug/net5.0
+/MarketTestScenarioGenerator/obj
+/MarketTestScenarioGenerator.Tests/bin/Debug/net5.0
+/MarketTestScenarioGenerator.Tests/obj/Debug/net5.0
+/MarketTestScenarioGenerator.Tests/obj
+/StandardFormLinearProgramParsing/bin/Debug/net5.0
+/StandardFormLinearProgramParsing/obj/Debug/net5.0
+/StandardFormLinearProgramParsing/obj
